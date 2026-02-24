@@ -1,79 +1,49 @@
 # zsh-ssh-setup
 
-ZSH plugin for SSH key lifecycle management. One ed25519 key per machine, deploy the public key everywhere.
+Oh-my-zsh plugin for SSH key management. One ed25519 key per machine, deploy the public key everywhere.
 
-## Strategy
+## Quick Start
 
-- **One private key per computer** you work from
-- **Same public key** goes to GitHub, GitLab, servers, embedded devices
-- **New machine?** Clone this plugin, run `ssh-gen`, deploy pubkey
-- **Retire a machine?** Remove its pubkey from services
-
-## Install
+Requires [oh-my-zsh](https://ohmyz.sh/).
 
 ```bash
-# Clone into oh-my-zsh custom plugins
 git clone https://github.com/YOUR_USER/zsh-ssh-setup.git \
     ~/.oh-my-zsh/custom/plugins/zsh-ssh-setup
 
-# Add to plugins in ~/.zshrc
-plugins=(... zsh-ssh-setup)
+~/.oh-my-zsh/custom/plugins/zsh-ssh-setup/install.sh
 
-# Reload
 source ~/.zshrc
+
+ssh-gen
 ```
+
+That's it. The installer adds the plugin to your `.zshrc` and explains every command it runs.
 
 ## Commands
 
 | Command | Description |
 |---|---|
-| `ssh-gen` | Generate new ed25519 key for this machine |
-| `ssh-pub` | Print public key (+ copy to clipboard) |
-| `ssh-info` | Key details, permissions, agent health check |
-| `ssh-deploy user@host` | Deploy pubkey to remote host via ssh-copy-id |
-| `ssh-fix-perms` | Fix ~/.ssh permissions (700/600/644) |
+| `ssh-gen` | Generate a new ed25519 key for this machine |
+| `ssh-pub` | Print your public key (auto-copies to clipboard) |
+| `ssh-info` | Key fingerprint, permissions check, agent status |
+| `ssh-deploy user@host` | Deploy your pubkey to a remote host |
+| `ssh-fix-perms` | Fix `~/.ssh` permissions (700/600/644) |
 
-## ssh-gen
+## What `ssh-gen` does
 
-Generates a new key with comment format `user@hostname-YYYY`.
-
-```bash
-# Interactive (prompts for passphrase)
-ssh-gen
-
-# No passphrase (CI/automation)
-ssh-gen --no-passphrase
-
-# Skip confirmation
-ssh-gen --force
-
-# Don't overwrite existing ~/.ssh/config
-ssh-gen --no-config
-```
-
-What `ssh-gen` does:
 1. Backs up existing keys to `~/.ssh/backup-YYYY-MM-DD/`
-2. Generates ed25519 key at `~/.ssh/id_ed25519`
-3. Writes clean `~/.ssh/config` (ControlMaster, AddKeysToAgent, GitHub/GitLab hosts)
-4. Displays public key (auto-copies to clipboard)
-5. Shows deployment instructions
-6. Runs verification checks
+2. Generates an ed25519 key with comment `user@hostname-YYYY`
+3. Writes a clean `~/.ssh/config` (connection multiplexing, GitHub/GitLab hosts)
+4. Displays your public key for copy-paste
+5. Runs a health check on permissions and ssh-agent
 
-## SSH Config
+Options:
+- `--no-passphrase` — skip passphrase (useful for CI)
+- `--no-config` — don't overwrite `~/.ssh/config`
+- `--force` — skip confirmation prompt
 
-`ssh-gen` writes a `~/.ssh/config` with sensible defaults:
+## Why
 
-- `IdentitiesOnly yes` — only send configured keys
-- `AddKeysToAgent yes` — auto ssh-add on first use
-- `ControlMaster auto` — connection multiplexing (faster)
-- `ServerAliveInterval 60` — keep connections alive
-- Pre-configured GitHub and GitLab host entries
-
-## Key Naming Convention
-
-```
-File:    ~/.ssh/id_ed25519
-Comment: morinv@xps8960-2026
-```
-
-The comment identifies **who**, **which machine**, and **when** (year for rotation tracking).
+- **New machine?** Clone, install, `ssh-gen`, deploy pubkey. Done.
+- **Retire a machine?** Remove its pubkey from your services.
+- **Multiple computers?** Each has its own key. Add all pubkeys where needed.
