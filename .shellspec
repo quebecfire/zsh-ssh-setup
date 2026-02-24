@@ -1,0 +1,3 @@
+--shell zsh
+--format documentation
+--warning-as-failure

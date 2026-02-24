@@ -1,0 +1,9 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    zsh git curl ca-certificates openssh-client coreutils && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://git.io/shellspec | sh -s -- --yes
+ENV PATH="/root/.local/bin:${PATH}"
+WORKDIR /root/plugin
+COPY . .
+ENTRYPOINT ["shellspec", "--shell", "zsh"]
